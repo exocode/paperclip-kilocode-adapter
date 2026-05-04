@@ -7,9 +7,7 @@ import { sessionCodec } from "./session-codec.js";
 import { listKiloModels } from "./models.js";
 
 export function createServerAdapter(): ServerAdapterModule {
-  const adapter: ServerAdapterModule & {
-    getConfigSchema: typeof getConfigSchema;
-  } = {
+  const adapter = {
     type,
     execute,
     testEnvironment,
@@ -18,6 +16,11 @@ export function createServerAdapter(): ServerAdapterModule {
     listModels: listKiloModels,
     getConfigSchema,
     agentConfigurationDoc,
+    // Kilo runs as a local CLI adapter, so it should participate in the same
+    // local-agent configuration UI as the built-in adapters.
+    supportsInstructionsBundle: true,
+    instructionsPathKey: "instructionsFilePath",
+    requiresMaterializedRuntimeSkills: false,
     // Kilo CLI 1.0 can run unattended and does not need Paperclip to synthesize
     // a separate local session JWT contract for the basic local adapter path.
     supportsLocalAgentJwt: false,
