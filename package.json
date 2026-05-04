@@ -1,9 +1,10 @@
 {
   "name": "@exocode/paperclip-kilocode-adapter",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Paperclip external adapter plugin for the Kilo Code CLI",
   "license": "MIT",
   "type": "module",
+  "packageManager": "pnpm@9.15.4",
   "homepage": "https://github.com/exocode/paperclip-kilocode-adapter",
   "repository": {
     "type": "git",
@@ -11,6 +12,9 @@
   },
   "bugs": {
     "url": "https://github.com/exocode/paperclip-kilocode-adapter/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "exports": {
     ".": "./dist/index.js",
