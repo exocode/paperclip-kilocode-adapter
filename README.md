@@ -53,9 +53,31 @@ Paperclip drives Kilo in autonomous mode with a prompt assembled from the curren
 
 The adapter intentionally uses the current Kilo 1.0 CLI shape:
 - `kilo`
-- `kilo run`
+- `kilo run --auto --model <provider/model> "..."`
 - `kilo --continue`
 - `kilo upgrade`
+
+Recommended first model:
+- `kilo/kilo-auto/balanced`
+
+You can list available models with:
+
+```bash
+kilo models
+```
+
+Useful adapter config example:
+
+```json
+{
+  "command": "kilo",
+  "model": "kilo/kilo-auto/balanced",
+  "cwd": "/absolute/path/to/workspace",
+  "timeoutSec": 1800,
+  "graceSec": 30,
+  "promptTemplate": "{{prompt}}"
+}
+```
 
 Kilo config is expected under:
 - `~/.config/kilo/opencode.json`

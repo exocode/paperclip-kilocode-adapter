@@ -1,6 +1,18 @@
 export const type = "kilocode_local";
 export const label = "Kilo Code (local)";
-export const models = [];
+export const DEFAULT_KILOCODE_LOCAL_MODEL = "kilo/kilo-auto/balanced";
+export const models = [
+    { id: DEFAULT_KILOCODE_LOCAL_MODEL, label: "Kilo Auto Balanced" },
+    { id: "kilo/kilo-auto/frontier", label: "Kilo Auto Frontier" },
+    { id: "kilo/kilo-auto/small", label: "Kilo Auto Small" },
+    { id: "kilo/openai/gpt-5.5", label: "OpenAI GPT-5.5" },
+    { id: "kilo/openai/gpt-5.4", label: "OpenAI GPT-5.4" },
+    { id: "kilo/openai/gpt-5.4-mini", label: "OpenAI GPT-5.4 Mini" },
+    { id: "kilo/openai/gpt-5.3-codex", label: "OpenAI GPT-5.3 Codex" },
+    { id: "kilo/anthropic/claude-opus-4.7", label: "Claude Opus 4.7" },
+    { id: "kilo/anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
+    { id: "kilo/google/gemini-3.1-pro-preview", label: "Gemini 3.1 Pro Preview" },
+];
 export const modelProfiles = [];
 export const agentConfigurationDoc = `# kilocode_local agent configuration
 
@@ -21,8 +33,11 @@ Core fields:
 - cwd (string, optional): absolute working directory for the adapter process
 - command (string, optional): defaults to \"kilo\"
 - runArgs (string[], optional): extra arguments passed to \`kilo run\`
+- model (string, optional): Kilo model id in provider/model format, for example \`kilo/kilo-auto/balanced\` or \`kilo/openai/gpt-5.5\`
+- variant (string, optional): provider-specific model variant or reasoning effort passed to \`kilo run --variant\`
 - promptTemplate (string, optional): prompt template used for autonomous runs
 - configDir (string, optional): overrides the Kilo config directory when needed
+- dangerouslySkipPermissions (boolean, optional): pass Kilo's \`--dangerously-skip-permissions\` flag for fully unattended runs
 - env (object, optional): KEY=VALUE environment variables
 
 Operational fields:

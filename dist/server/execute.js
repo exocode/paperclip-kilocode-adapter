@@ -5,6 +5,12 @@ function asString(value, fallback) {
 function asNumber(value, fallback) {
     return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
+function asBoolean(value, fallback) {
+    return typeof value === "boolean" ? value : fallback;
+}
+function asStringArray(value) {
+    return Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
+}
 function parseObject(value) {
     if (typeof value !== "object" || value === null || Array.isArray(value)) {
         return {};
@@ -56,6 +62,10 @@ export async function execute(ctx) {
     const timeoutSec = asNumber(ctx.config.timeoutSec, 1800);
     const graceSec = asNumber(ctx.config.graceSec, 30);
     const configDir = asString(ctx.config.configDir, "").trim();
+    const model = asString(ctx.config.model, "").trim();
+    const variant = asString(ctx.config.variant, "").trim();
+    const runArgs = asStringArray(ctx.config.runArgs);
+    const dangerouslySkipPermissions = asBoolean(ctx.config.dangerouslySkipPermissions, false);
     const envConfig = normalizeEnv(parseObject(ctx.config.env));
     const env = {
         ...buildPaperclipEnv(ctx.agent),
@@ -65,7 +75,14 @@ export async function execute(ctx) {
         env.KILO_CONFIG_DIR = configDir;
     }
     const prompt = buildPrompt(ctx);
-    const args = ["run", "--auto", prompt];
+    const args = ["run", "--auto"];
+    if (dangerouslySkipPermissions)
+        args.push("--dangerously-skip-permissions");
+    if (model)
+        args.push("--model", model);
+    if (variant)
+        args.push("--variant", variant);
+    args.push(...runArgs, prompt);
     await ctx.onMeta?.({
         adapterType: ctx.agent.adapterType ?? "kilocode_local",
         command,
@@ -74,6 +91,9 @@ export async function execute(ctx) {
         context: {
             hasPromptTemplate: Boolean(ctx.config.promptTemplate),
             configDir: configDir || null,
+            model: model || null,
+            variant: variant || null,
+            dangerouslySkipPermissions,
         },
     });
     return await new Promise((resolve) => {
@@ -127,8 +147,8 @@ export async function execute(ctx) {
                 timedOut,
                 sessionDisplayId: null,
                 sessionParams: null,
-                provider: "kilo",
-                model: null,
+                provider: model.includes("/") ? model.split("/")[1] ?? "kilo" : "kilo",
+                model: model || null,
                 summary: stdout.trim().slice(0, 500),
                 resultJson: { stdout, stderr, command, args },
             });

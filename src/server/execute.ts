@@ -9,6 +9,14 @@ function asNumber(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+function asBoolean(value: unknown, fallback: boolean): boolean {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
 function parseObject(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return {};
@@ -64,6 +72,10 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   const timeoutSec = asNumber(ctx.config.timeoutSec, 1800);
   const graceSec = asNumber(ctx.config.graceSec, 30);
   const configDir = asString(ctx.config.configDir, "").trim();
+  const model = asString(ctx.config.model, "").trim();
+  const variant = asString(ctx.config.variant, "").trim();
+  const runArgs = asStringArray(ctx.config.runArgs);
+  const dangerouslySkipPermissions = asBoolean(ctx.config.dangerouslySkipPermissions, false);
   const envConfig = normalizeEnv(parseObject(ctx.config.env));
   const env = {
     ...buildPaperclipEnv(ctx.agent),
@@ -75,7 +87,11 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   }
 
   const prompt = buildPrompt(ctx);
-  const args = ["run", "--auto", prompt];
+  const args = ["run", "--auto"];
+  if (dangerouslySkipPermissions) args.push("--dangerously-skip-permissions");
+  if (model) args.push("--model", model);
+  if (variant) args.push("--variant", variant);
+  args.push(...runArgs, prompt);
 
   await ctx.onMeta?.({
     adapterType: ctx.agent.adapterType ?? "kilocode_local",
@@ -85,6 +101,9 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
     context: {
       hasPromptTemplate: Boolean(ctx.config.promptTemplate),
       configDir: configDir || null,
+      model: model || null,
+      variant: variant || null,
+      dangerouslySkipPermissions,
     },
   });
 
@@ -140,8 +159,8 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
         timedOut,
         sessionDisplayId: null,
         sessionParams: null,
-        provider: "kilo",
-        model: null,
+        provider: model.includes("/") ? model.split("/")[1] ?? "kilo" : "kilo",
+        model: model || null,
         summary: stdout.trim().slice(0, 500),
         resultJson: { stdout, stderr, command, args },
       });
