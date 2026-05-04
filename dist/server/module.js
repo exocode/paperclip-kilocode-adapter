@@ -1,19 +1,22 @@
 import { type, models, agentConfigurationDoc } from "../index.js";
+import { getConfigSchema } from "./config-schema.js";
 import { execute } from "./execute.js";
 import { testEnvironment } from "./test.js";
 import { sessionCodec } from "./session-codec.js";
 import { listKiloModels } from "./models.js";
 export function createServerAdapter() {
-    return {
+    const adapter = {
         type,
         execute,
         testEnvironment,
         sessionCodec,
         models,
         listModels: listKiloModels,
+        getConfigSchema,
         agentConfigurationDoc,
         // Kilo CLI 1.0 can run unattended and does not need Paperclip to synthesize
         // a separate local session JWT contract for the basic local adapter path.
         supportsLocalAgentJwt: false,
     };
+    return adapter;
 }
