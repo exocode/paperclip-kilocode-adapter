@@ -1,0 +1,1 @@
+{"version":3,"file":"detect-model.d.ts","sourceRoot":"","sources":["../../src/server/detect-model.ts"],"names":[],"mappings":"AAuBA,wBAAsB,WAAW,IAAI,OAAO,CAAC;IAAE,KAAK,EAAE,MAAM,CAAC;IAAC,QAAQ,EAAE,MAAM,CAAC;IAAC,MAAM,EAAE,MAAM,CAAC;IAAC,UAAU,CAAC,EAAE,MAAM,EAAE,CAAA;CAAE,GAAG,IAAI,CAAC,CAqC9H"}

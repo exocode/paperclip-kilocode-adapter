@@ -1,0 +1,41 @@
+{
+  "name": "@exocode/paperclip-kilocode-adapter",
+  "version": "0.1.0",
+  "description": "Paperclip external adapter plugin for the Kilo Code CLI",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/exocode/paperclip-kilocode-adapter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exocode/paperclip-kilocode-adapter"
+  },
+  "bugs": {
+    "url": "https://github.com/exocode/paperclip-kilocode-adapter/issues"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./server": "./dist/server/index.js",
+    "./ui-parser": "./dist/ui-parser.js"
+  },
+  "paperclip": {
+    "adapterUiParser": "1.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "@paperclipai/adapter-utils": "0.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "typescript": "^5.7.3"
+  }
+}
