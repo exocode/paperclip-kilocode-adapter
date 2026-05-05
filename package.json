@@ -1,6 +1,6 @@
 {
   "name": "@exocode/paperclip-kilocode-adapter",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Paperclip external adapter plugin for the Kilo Code CLI",
   "license": "MIT",
   "type": "module",
