@@ -162,27 +162,15 @@ This repository includes `.github/workflows/publish.yml` for automated JSR publi
 
 The workflow:
 - runs on tags matching `v*` or via manual workflow dispatch
-- requests `id-token: write` for OIDC authentication
+- uses OIDC authentication (no tokens needed!)
 - runs `pnpm install`, `pnpm typecheck`
-- publishes with `npx jsr publish --allow-slow-types --token ${{ secrets.JSR_TOKEN }}`
+- publishes with `npx jsr publish --allow-slow-types`
 
-### JSR Authentication Setup
+### JSR OIDC Authentication
 
-For GitHub Actions to publish to JSR, you need to create an access token and add it as a repository secret:
+JSR uses GitHub OIDC for secure authentication in GitHub Actions. The workflow automatically authenticates using the repository's GitHub identity - **no personal access tokens needed**.
 
-1. **Create JSR Token:**
-   - Go to https://jsr.io/account/tokens
-   - Click "Create token"
-   - Give it a name like "GitHub Actions"
-   - Select "Publish" permission
-   - Copy the generated token
-
-2. **Add GitHub Secret:**
-   - Go to your GitHub repository: https://github.com/exocode/paperclip-kilocode-adapter/settings/secrets/actions
-   - Click "New repository secret"
-   - Name: `JSR_TOKEN`
-   - Value: Paste the token from step 1
-   - Click "Add secret"
+The `id-token: write` permission in the workflow file enables OIDC authentication.
 
 For manual publishing from your local machine, JSR will prompt you to authorize via your browser the first time you run `jsr publish`.
 

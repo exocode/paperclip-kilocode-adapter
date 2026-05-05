@@ -36,4 +36,4 @@ jobs:
         run: pnpm typecheck
 
       - name: Publish to JSR
-        run: npx jsr publish --allow-slow-types --token ${{ secrets.JSR_TOKEN }}
+        run: npx jsr publish --allow-slow-types
