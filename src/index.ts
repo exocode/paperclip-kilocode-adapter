@@ -24,7 +24,7 @@ export const modelProfiles: Array<{
   source?: string;
 }> = [];
 
-export const agentConfigurationDoc = `# kilocode_local agent configuration
+export const agentConfigurationDoc: string = `# kilocode_local agent configuration
 
 Adapter: kilocode_local
 

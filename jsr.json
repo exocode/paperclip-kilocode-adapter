@@ -1,0 +1,17 @@
+{
+  "name": "@exocode/paperclip-kilocode-adapter",
+  "version": "0.2.1",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts",
+    "./ui-parser": "./src/ui-parser.ts"
+  },
+  "publish": {
+    "exclude": [
+      "node_modules",
+      "dist",
+      ".git"
+    ]
+  }
+}

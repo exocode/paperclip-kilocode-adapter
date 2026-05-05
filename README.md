@@ -2,8 +2,9 @@
 
 External Paperclip adapter plugin for the current Kilo Code CLI.
 
+**📦 Available on JSR:** [jsr.io/@exocode/paperclip-kilocode-adapter](https://jsr.io/@exocode/paperclip-kilocode-adapter)
+
 Repository: https://github.com/exocode/paperclip-kilocode-adapter
-Package: `@exocode/paperclip-kilocode-adapter`
 
 ## What this is
 
@@ -63,10 +64,22 @@ Inside Kilo, finish provider setup with `/connect` if needed.
 
 ### 2) Install the Paperclip adapter plugin
 
-From npm:
+From JSR (recommended):
 
 ```bash
-npm install -g @exocode/paperclip-kilocode-adapter
+npx jsr add @exocode/paperclip-kilocode-adapter
+```
+
+Or with deno:
+
+```bash
+deno add @exocode/paperclip-kilocode-adapter
+```
+
+Or with pnpm:
+
+```bash
+pnpm dlx jsr add @exocode/paperclip-kilocode-adapter
 ```
 
 Then register it in Paperclip:
@@ -143,48 +156,43 @@ Kilo config is expected under:
 - `~/.config/kilo/kilo.jsonc`
 - `~/.config/kilo/config.json`
 
-## Publishing to npm with trusted publishing
+## Publishing to JSR
 
-This repository includes `.github/workflows/publish.yml` for GitHub Actions OIDC publishing.
+This repository includes `.github/workflows/publish.yml` for automated JSR publishing via GitHub Actions.
 
 The workflow:
-- runs on tags matching `v*`
-- requests `id-token: write`
-- runs `pnpm install`, `pnpm typecheck`, and `pnpm build`
-- publishes with `npm publish --provenance --access public`
+- runs on tags matching `v*` or via manual workflow dispatch
+- requests `id-token: write` for OIDC authentication
+- runs `pnpm install`, `pnpm typecheck`
+- publishes with `npx jsr publish`
 
-### One-time npm setup
+### JSR Authentication
 
-You must connect the npm package to this GitHub Actions workflow as a trusted publisher.
+JSR uses GitHub OIDC for authentication in CI/CD environments. The workflow automatically authenticates using the repository's GitHub identity.
 
-According to npm trusted publisher docs, the required GitHub fields are:
-- owner: `exocode`
-- repository: `paperclip-kilocode-adapter`
-- workflow file: `publish.yml`
-
-You can do that either in the npm web UI or with the npm CLI after logging in:
-
-```bash
-npm trust github @exocode/paperclip-kilocode-adapter \
-  --repo exocode/paperclip-kilocode-adapter \
-  --file publish.yml \
-  --yes
-```
-
-Note: this machine is not currently logged into npm, so the trusted publisher relationship must be completed by an npm account that owns the `@exocode` scope or this package.
+For manual publishing from your local machine, JSR will prompt you to authorize via your browser the first time you run `jsr publish`.
 
 ### Release flow
 
-1. Bump `package.json` version.
+1. Bump `version` in both `package.json` and `jsr.json`.
 2. Commit to `main`.
 3. Create and push a Git tag:
 
 ```bash
-git tag v0.2.1
+git tag v0.2.2
 git push origin main --tags
 ```
 
-4. GitHub Actions publishes the package to npm.
+4. GitHub Actions publishes the package to JSR automatically.
+
+### Manual publishing
+
+You can also publish manually:
+
+```bash
+npm install -g jsr
+jsr publish
+```
 
 ## Notes
 

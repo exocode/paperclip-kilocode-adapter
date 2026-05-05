@@ -27,7 +27,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
           cache: pnpm
 
       - name: Install dependencies
@@ -36,8 +35,5 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Build package
-        run: pnpm build
-
-      - name: Publish to npm with provenance
-        run: npm publish --provenance --access public
+      - name: Publish to JSR
+        run: npx jsr publish
