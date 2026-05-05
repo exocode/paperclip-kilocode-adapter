@@ -40,4 +40,4 @@ jobs:
         run: pnpm typecheck
 
       - name: Publish to JSR
-        run: deno publish --no-check --allow-slow-types
+        run: deno publish --no-check --allow-slow-types --sloppy-imports
