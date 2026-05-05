@@ -1,6 +1,6 @@
 {
   "name": "@exocode/paperclip-kilocode-adapter",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
