@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import type { AdapterExecutionContext, AdapterExecutionResult } from "@paperclipai/adapter-utils";
+import { ensureKiloSkillsInjected } from "./skills.js";
 
 function asString(value: unknown, fallback: string): string {
   return typeof value === "string" && value.length > 0 ? value : fallback;
@@ -85,6 +86,8 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   if (configDir) {
     env.KILO_CONFIG_DIR = configDir;
   }
+
+  await ensureKiloSkillsInjected(ctx.config, ctx.onLog);
 
   const prompt = buildPrompt(ctx);
   const args = ["run", "--auto"];

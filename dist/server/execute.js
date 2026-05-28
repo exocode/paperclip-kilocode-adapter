@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { ensureKiloSkillsInjected } from "./skills.js";
 function asString(value, fallback) {
     return typeof value === "string" && value.length > 0 ? value : fallback;
 }
@@ -74,6 +75,7 @@ export async function execute(ctx) {
     if (configDir) {
         env.KILO_CONFIG_DIR = configDir;
     }
+    await ensureKiloSkillsInjected(ctx.config, ctx.onLog);
     const prompt = buildPrompt(ctx);
     const args = ["run", "--auto"];
     if (dangerouslySkipPermissions)

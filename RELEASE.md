@@ -3,8 +3,8 @@
 ## Current release target
 
 - package: `@exocode/paperclip-kilocode-adapter`
-- version: `0.2.1`
-- git tag: `v0.2.1`
+- version: `0.2.7`
+- git tag: `v0.2.7`
 
 ## Preflight
 
@@ -36,7 +36,7 @@ Equivalent npm web UI values:
 ```bash
 git checkout main
 git pull --ff-only
-git tag v0.2.1
+git tag v0.2.7
 git push origin main --tags
 ```
 
@@ -57,8 +57,8 @@ npm view @exocode/paperclip-kilocode-adapter version dist-tags --json
 ```
 
 Expected result should include:
-- version `0.2.1`
-- dist-tag `latest: 0.2.1`
+- version `0.2.7`
+- dist-tag `latest: 0.2.7`
 
 ## Notes
 
