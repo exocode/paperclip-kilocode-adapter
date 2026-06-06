@@ -52,10 +52,39 @@ function normalizeEnv(input) {
         return {};
     const env = {};
     for (const [key, value] of Object.entries(input)) {
-        if (typeof value === "string")
+        if (typeof value === "string") {
+            // plain string (e.g. PAPERCLIP_API_KEY injected by registry)
             env[key] = value;
+        }
+        else if (typeof value === "object" &&
+            value !== null &&
+            "value" in value &&
+            typeof value["value"] === "string") {
+            // structured env format: { type: "plain", value: "..." }
+            env[key] = value["value"];
+        }
     }
     return env;
+}
+/**
+ * Build a PATH that includes Homebrew bin dirs so that `kilo` can be found
+ * even when Paperclip Desktop (Electron) starts with a minimal environment.
+ */
+function resolvedEnv(extraEnv) {
+    const brewPaths = [
+        "/opt/homebrew/opt/node@22/bin",
+        "/opt/homebrew/bin",
+        "/opt/homebrew/sbin",
+        "/usr/local/bin",
+    ];
+    // prefer PATH from agent config, then process.env, then fallback
+    const base = extraEnv["PATH"] ?? process.env["PATH"] ?? "/usr/bin:/bin:/usr/sbin:/sbin";
+    const parts = base.split(":").filter(Boolean);
+    for (const p of brewPaths.reverse()) {
+        if (!parts.includes(p))
+            parts.unshift(p);
+    }
+    return { ...process.env, ...extraEnv, PATH: parts.join(":") };
 }
 export async function execute(ctx) {
     const command = asString(ctx.config.command, "kilo");
@@ -101,7 +130,7 @@ export async function execute(ctx) {
     return await new Promise((resolve) => {
         const child = spawn(command, args, {
             cwd,
-            env: { ...process.env, ...env },
+            env: resolvedEnv(env),
             stdio: ["ignore", "pipe", "pipe"],
         });
         let stdout = "";
