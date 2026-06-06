@@ -44,9 +44,28 @@ export function parseKiloModelsOutput(output: string): Array<{ id: string; label
   return models;
 }
 
+/**
+ * Build a PATH that includes Homebrew bin dirs so that `kilo` can be found
+ * even when Paperclip Desktop (Electron) starts with a minimal environment.
+ */
+function resolvedEnv(): NodeJS.ProcessEnv {
+  const brewPaths = [
+    "/opt/homebrew/opt/node@22/bin",
+    "/opt/homebrew/bin",
+    "/opt/homebrew/sbin",
+    "/usr/local/bin",
+  ];
+  const existing = process.env["PATH"] ?? "/usr/bin:/bin:/usr/sbin:/sbin";
+  const parts = existing.split(":").filter(Boolean);
+  for (const p of brewPaths.reverse()) {
+    if (!parts.includes(p)) parts.unshift(p);
+  }
+  return { ...process.env, PATH: parts.join(":") };
+}
+
 export async function listKiloModels(command = "kilo"): Promise<Array<{ id: string; label: string }>> {
   const result = await new Promise<{ exitCode: number | null; stdout: string; stderr: string }>((resolve) => {
-    const child = spawn(command, ["models"], { stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(command, ["models"], { stdio: ["ignore", "pipe", "pipe"], env: resolvedEnv() });
     let stdout = "";
     let stderr = "";
     child.stdout?.on("data", (chunk: Buffer) => { stdout += chunk.toString("utf8"); });
