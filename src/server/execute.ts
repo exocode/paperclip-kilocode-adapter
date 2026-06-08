@@ -114,6 +114,14 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
     ...envConfig,
   };
 
+  // Inject run-scoped vars from execution context (mirrors codex-local behaviour).
+  // PAPERCLIP_RUN_ID is always set; PAPERCLIP_API_KEY is set from authToken only
+  // when the config.env block does not already supply an explicit key.
+  env.PAPERCLIP_RUN_ID = ctx.runId;
+  if (!envConfig.PAPERCLIP_API_KEY && ctx.authToken) {
+    env.PAPERCLIP_API_KEY = ctx.authToken;
+  }
+
   if (configDir) {
     env.KILO_CONFIG_DIR = configDir;
   }
