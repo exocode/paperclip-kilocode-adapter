@@ -1,4 +1,7 @@
 import { spawn } from "node:child_process";
+import { readFileSync, readdirSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 export const DEFAULT_KILOCODE_LOCAL_MODEL = "kilo/kilo-auto/balanced";
 export const fallbackModels = [
     { id: "kilo/kilo-auto/balanced", label: "Kilo Auto Balanced" },
@@ -43,13 +46,21 @@ export function parseKiloModelsOutput(output) {
 /**
  * Build a PATH that includes Homebrew bin dirs so that `kilo` can be found
  * even when Paperclip Desktop (Electron) starts with a minimal environment.
+ * Also includes $HOME so the ~/kilo symlink is reachable inside Docker
+ * (where /opt/homebrew is not mounted but $HOME is).
  */
 function resolvedEnv() {
+    const home = process.env["HOME"] ?? "";
     const brewPaths = [
         "/opt/homebrew/opt/node@22/bin",
         "/opt/homebrew/bin",
         "/opt/homebrew/sbin",
         "/usr/local/bin",
+        // /paperclip/kilo persistent wrapper — survives container restarts
+        // because /paperclip is a mounted volume
+        "/paperclip",
+        // ~/kilo fallback — works inside Docker where $HOME is mounted
+        ...(home ? [home] : []),
     ];
     const existing = process.env["PATH"] ?? "/usr/bin:/bin:/usr/sbin:/sbin";
     const parts = existing.split(":").filter(Boolean);
@@ -71,6 +82,30 @@ export async function listKiloModels(command = "kilo") {
     });
     if ((result.exitCode ?? 1) !== 0) {
         const detail = firstNonEmptyLine(result.stderr) || firstNonEmptyLine(result.stdout);
+        // Try reading from cache file (~/.kilo/models-cache.txt) — useful when
+        // running inside Docker where the kilo CLI binary is not available.
+        // The container mounts $HOME:$HOME so /Users/<user>/.kilo is accessible
+        // at the same path as on the host.
+        const candidateDirs = [homedir()];
+        // Also check /Users/* for macOS host home dirs mounted into the container
+        try {
+            for (const entry of readdirSync("/Users")) {
+                candidateDirs.push(`/Users/${entry}`);
+            }
+        }
+        catch { /* /Users not present (native macOS run), skip */ }
+        for (const dir of candidateDirs) {
+            try {
+                const cachePath = join(dir, ".kilo", "models-cache.txt");
+                const cached = readFileSync(cachePath, "utf8");
+                const cachedModels = parseKiloModelsOutput(cached);
+                if (cachedModels.length > 0)
+                    return cachedModels;
+            }
+            catch {
+                // not found here, try next
+            }
+        }
         throw new Error(detail ? `kilo models failed: ${detail}` : "kilo models failed");
     }
     const models = parseKiloModelsOutput(result.stdout);

@@ -71,11 +71,16 @@ function normalizeEnv(input) {
  * even when Paperclip Desktop (Electron) starts with a minimal environment.
  */
 function resolvedEnv(extraEnv) {
+    const home = process.env["HOME"] ?? "";
     const brewPaths = [
         "/opt/homebrew/opt/node@22/bin",
         "/opt/homebrew/bin",
         "/opt/homebrew/sbin",
         "/usr/local/bin",
+        // /paperclip/kilo persistent wrapper — survives container restarts
+        "/paperclip",
+        // ~/kilo fallback — works inside Docker where $HOME is mounted
+        ...(home ? [home] : []),
     ];
     // prefer PATH from agent config, then process.env, then fallback
     const base = extraEnv["PATH"] ?? process.env["PATH"] ?? "/usr/bin:/bin:/usr/sbin:/sbin";

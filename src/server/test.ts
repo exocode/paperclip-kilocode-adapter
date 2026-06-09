@@ -19,7 +19,7 @@ export async function testEnvironment(ctx: AdapterEnvironmentTestContext): Promi
   checks.push({
     code: "kilocode_cli_version_policy",
     level: "info",
-    message: "This adapter targets Kilo Code CLI 1.0+ with the current kilo run / connect / upgrade workflow.",
+    message: "This adapter targets Kilo Code CLI 7.x — uses kilo run --auto for autonomous runs.",
   });
 
   const model = typeof ctx.config.model === "string" ? ctx.config.model.trim() : "";

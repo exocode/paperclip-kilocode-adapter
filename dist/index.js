@@ -45,7 +45,7 @@ Operational fields:
 - graceSec (number, optional): SIGTERM grace period in seconds
 
 Notes:
-- Kilo CLI 1.0 uses \`kilo\`, \`kilo run\`, \`kilo upgrade\`, and \`kilo --continue\`.
+- Kilo CLI 7.x uses \`kilo run --auto\` for autonomous/pipeline usage. The \`-c\`/\`--continue\` flag resumes the last session, \`--session <id>\` resumes a specific session.
 - Kilo configuration is stored under \`~/.config/kilo/\`.
 - The adapter intentionally keeps prompts simple and non-prescriptive so Paperclip can supply the work context.
 `;
