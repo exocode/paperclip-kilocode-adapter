@@ -24,7 +24,7 @@ export function createServerAdapter() {
         requiresMaterializedRuntimeSkills: true,
         // Kilo CLI 1.0 can run unattended and does not need Paperclip to synthesize
         // a separate local session JWT contract for the basic local adapter path.
-        supportsLocalAgentJwt: false,
+        supportsLocalAgentJwt: true,
     };
     return adapter;
 }

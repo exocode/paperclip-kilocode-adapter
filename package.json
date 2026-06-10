@@ -36,7 +36,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@paperclipai/adapter-utils": "0.3.1"
+    "@paperclipai/adapter-utils": "^2026.529.0"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",

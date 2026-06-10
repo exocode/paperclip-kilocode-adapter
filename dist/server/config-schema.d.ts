@@ -2,7 +2,7 @@ export declare function getConfigSchema(): {
     fields: ({
         key: string;
         label: string;
-        type: string;
+        type: "text";
         default: string;
         hint: string;
         options?: never;
@@ -10,7 +10,7 @@ export declare function getConfigSchema(): {
     } | {
         key: string;
         label: string;
-        type: string;
+        type: "select";
         default: string;
         options: {
             value: string;
@@ -21,7 +21,7 @@ export declare function getConfigSchema(): {
     } | {
         key: string;
         label: string;
-        type: string;
+        type: "toggle";
         default: boolean;
         hint: string;
         options?: never;
@@ -29,7 +29,15 @@ export declare function getConfigSchema(): {
     } | {
         key: string;
         label: string;
-        type: string;
+        type: "textarea";
+        default: string;
+        hint: string;
+        options?: never;
+        required?: never;
+    } | {
+        key: string;
+        label: string;
+        type: "number";
         default: number;
         hint: string;
         options?: never;
