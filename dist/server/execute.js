@@ -19,11 +19,22 @@ function parseObject(value) {
     return value;
 }
 function buildPaperclipEnv(agent) {
+    // Resolve the API URL the same way the official adapter-utils does:
+    // prefer the runtime env var, fall back to localhost:3100.
+    const runtimeHost = (process.env.PAPERCLIP_LISTEN_HOST ?? process.env.HOST ?? "localhost").trim()
+        .replace(/^(.+:.+)$/, "[$1]") // bracket bare IPv6
+        .replace(/^(0\.0\.0\.0|::)$/, "localhost");
+    const runtimePort = process.env.PAPERCLIP_LISTEN_PORT ?? process.env.PORT ?? "3100";
+    const apiUrl = process.env.PAPERCLIP_RUNTIME_API_URL ??
+        process.env.PAPERCLIP_API_URL ??
+        `http://${runtimeHost}:${runtimePort}`;
     return {
         PAPERCLIP_AGENT_ID: agent.id,
         PAPERCLIP_COMPANY_ID: agent.companyId,
         PAPERCLIP_AGENT_NAME: agent.name,
         PAPERCLIP_ADAPTER_TYPE: agent.adapterType ?? "",
+        PAPERCLIP_API_URL: apiUrl,
+        PAPERCLIP_RUNTIME_API_URL: apiUrl,
     };
 }
 function renderTemplate(template, values) {
