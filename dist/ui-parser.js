@@ -31,13 +31,17 @@ export function parseKiloStdoutLine(line, ts) {
     }
     const type = asString(parsed.type);
     if (type === "assistant" || type === "text") {
-        const text = asString(parsed.text ?? parsed.content).trim();
+        // Support both the legacy flat format (text/content at root) and the
+        // native kilo --format json format where text lives in part.text.
+        const part = asRecord(parsed.part);
+        const text = asString(parsed.text ?? parsed.content ?? part?.text ?? part?.content).trim();
         if (!text)
             return [];
         return [{ kind: "assistant", ts, text }];
     }
     if (type === "thinking" || type === "reasoning") {
-        const text = asString(parsed.text ?? parsed.content).trim();
+        const part = asRecord(parsed.part);
+        const text = asString(parsed.text ?? parsed.content ?? part?.text ?? part?.content).trim();
         if (!text)
             return [];
         return [{ kind: "thinking", ts, text }];
@@ -84,6 +88,10 @@ export function parseKiloStdoutLine(line, ts) {
     if (type === "error") {
         const text = asString(parsed.message, line);
         return [{ kind: "stderr", ts, text }];
+    }
+    // kilo --format json internal events — no visible transcript entry needed.
+    if (type === "step_start" || type === "step_finish") {
+        return [];
     }
     return [{ kind: "stdout", ts, text: line }];
 }

@@ -129,7 +129,7 @@ export async function execute(ctx) {
     }
     await ensureKiloSkillsInjected(ctx.config, ctx.onLog);
     const prompt = buildPrompt(ctx);
-    const args = ["run", "--auto"];
+    const args = ["run", "--auto", "--format", "json"];
     if (dangerouslySkipPermissions)
         args.push("--dangerously-skip-permissions");
     if (model)
@@ -150,6 +150,32 @@ export async function execute(ctx) {
             dangerouslySkipPermissions,
         },
     });
+    // Accumulate token usage and cost from kilo --format json step_finish events.
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+    let totalCachedInputTokens = 0;
+    let totalCostUsd = 0;
+    function parseStepFinishTokens(line) {
+        try {
+            const obj = JSON.parse(line);
+            if (obj.type !== "step_finish")
+                return;
+            const part = obj.part;
+            if (!part)
+                return;
+            const tokens = part.tokens;
+            if (tokens) {
+                const cache = tokens.cache;
+                totalInputTokens += asNumber(tokens.input, 0);
+                totalOutputTokens += asNumber(tokens.output, 0);
+                totalCachedInputTokens += asNumber(cache?.read, 0);
+            }
+            totalCostUsd += asNumber(part.cost, 0);
+        }
+        catch {
+            // not JSON or not a step_finish — ignore
+        }
+    }
     return await new Promise((resolve) => {
         const child = spawn(command, args, {
             cwd,
@@ -159,6 +185,7 @@ export async function execute(ctx) {
         let stdout = "";
         let stderr = "";
         let timedOut = false;
+        let stdoutBuffer = "";
         const timeoutHandle = timeoutSec > 0
             ? setTimeout(() => {
                 timedOut = true;
@@ -169,6 +196,15 @@ export async function execute(ctx) {
         child.stdout?.on("data", async (chunk) => {
             const text = chunk.toString("utf8");
             stdout += text;
+            stdoutBuffer += text;
+            // Parse complete lines to extract step_finish token/cost data.
+            const lines = stdoutBuffer.split("\n");
+            stdoutBuffer = lines.pop() ?? "";
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed)
+                    parseStepFinishTokens(trimmed);
+            }
             await ctx.onLog("stdout", text);
         });
         child.stderr?.on("data", async (chunk) => {
@@ -195,6 +231,10 @@ export async function execute(ctx) {
         child.on("close", (code, sig) => {
             if (timeoutHandle)
                 clearTimeout(timeoutHandle);
+            // Flush any remaining buffered line.
+            if (stdoutBuffer.trim())
+                parseStepFinishTokens(stdoutBuffer.trim());
+            const hasUsage = totalInputTokens > 0 || totalOutputTokens > 0 || totalCachedInputTokens > 0;
             resolve({
                 exitCode: code,
                 signal: sig,
@@ -203,6 +243,15 @@ export async function execute(ctx) {
                 sessionParams: null,
                 provider: model.includes("/") ? model.split("/")[1] ?? "kilo" : "kilo",
                 model: model || null,
+                billingType: "credits",
+                ...(hasUsage ? {
+                    usage: {
+                        inputTokens: totalInputTokens,
+                        outputTokens: totalOutputTokens,
+                        cachedInputTokens: totalCachedInputTokens,
+                    },
+                } : {}),
+                ...(totalCostUsd > 0 ? { costUsd: totalCostUsd } : {}),
                 summary: stdout.trim().slice(0, 500),
                 resultJson: { stdout, stderr, command, args },
             });
